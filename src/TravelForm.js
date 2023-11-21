@@ -1,16 +1,17 @@
 // TravelForm.js
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./TravelForm.css";
-import { useState } from "react";
 import axios from "axios";
 
 export default function TravelForm() {
   const [dob, setDob] = useState("");
   const [startingDate, setStartingDate] = useState("");
   const [endingDate, setEndingDate] = useState("");
-  const [Coverage_Area, setCoverage_Area] = useState([]);
-  const [Coverage_Period, setCoverage_Period] = useState(``);
+  const [coverageArea, setCoverageArea] = useState([]);
+  const [coveragePeriod, setCoveragePeriod] = useState([]);
+
+  const [daysDifference, setDaysDifference] = useState(null);
+  const [age, setAge] = useState(null);
 
   useEffect(() => {
     const fetchAPiData = async () => {
@@ -19,8 +20,9 @@ export default function TravelForm() {
         const response = await axios.get(
           "https://localhost:7110/api/TravelRegions"
         );
-        setCoverage_Area(response.data);
-        console.log(response.data);
+        setCoverageArea(response.data);
+        // Set the global variable
+        // coverAreadata = response.data;
 
         // Fetch data from the second API
       } catch (error) {
@@ -31,7 +33,38 @@ export default function TravelForm() {
     fetchAPiData();
   }, []);
 
-  //???console.log(newData);
+  // console.log(coverAreadata);
+
+  useEffect(() => {
+    // Calculate the difference in days when either startingDate or endingDate changes
+    const calculateDaysDifference = () => {
+      if (startingDate && endingDate) {
+        const startDate = new Date(startingDate);
+        const endDate = new Date(endingDate);
+        const differenceInTime = endDate.getTime() - startDate.getTime();
+        const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+        setDaysDifference(differenceInDays);
+      }
+    };
+
+    calculateDaysDifference();
+  }, [startingDate, endingDate]);
+
+  // calculate age
+
+  useEffect(() => {
+    const calculateAge = () => {
+      if (dob) {
+        const birthDate = new Date(dob);
+        const currentDate = new Date();
+        const ageDifference =
+          currentDate.getFullYear() - birthDate.getFullYear();
+        setAge(ageDifference);
+      }
+    };
+
+    calculateAge();
+  }, [dob]);
 
   return (
     <div className="container">
@@ -78,10 +111,10 @@ export default function TravelForm() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="Coverage_Area">Coverage Area:</label>
-          <select className="form-control" id="Coverage_Area" required>
+          <label htmlFor="coverageArea">Coverage Area:</label>
+          <select className="form-control" id="coverageArea" required>
             {/* <option value="option1">Africa</option> */}
-            {Coverage_Area.map((areas) => (
+            {coverageArea.map((areas) => (
               <option key={areas.rid} value={areas.region}>
                 {areas.region}
               </option>
@@ -99,8 +132,8 @@ export default function TravelForm() {
         </div>
 
         <h1>dob:{dob}</h1>
-        <h1>startdate: {startingDate}</h1>
-        <h1>enddate: {endingDate}</h1>
+        <h1>Number of days : {daysDifference}</h1>
+        <h1>Age: {age}</h1>
 
         {/* <div className="form-group">
           <label htmlFor="select3">Select Option 3:</label>
