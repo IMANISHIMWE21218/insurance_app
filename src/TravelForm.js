@@ -13,6 +13,11 @@ export default function TravelForm() {
   const [daysDifference, setDaysDifference] = useState(null);
   const [age, setAge] = useState(null);
 
+  const [selectedCoverageArea, setSelectedCoverageArea] = useState("");
+  const [selectedCoveragePeriod, setSelectedCoveragePeriod] = useState("");
+
+  const [coverRatesData, setCoverRatesData] = useState([]);
+
   useEffect(() => {
     const fetchAPiData = async () => {
       try {
@@ -20,11 +25,21 @@ export default function TravelForm() {
         const response = await axios.get(
           "https://localhost:7110/api/TravelRegions"
         );
+
         setCoverageArea(response.data);
         // Set the global variable
         // coverAreadata = response.data;
 
         // Fetch data from the second API
+        const response2 = await axios.get(
+          "https://localhost:7110/api/TravelCoverPeriods"
+        );
+        setCoveragePeriod(response2.data);
+
+        //
+        // console.table(response2.data);
+
+        //end
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -66,6 +81,39 @@ export default function TravelForm() {
     calculateAge();
   }, [dob]);
 
+  // Getting amount for * with exchange rate
+
+  useEffect(() => {
+    console.log("start from here.");
+    const fetchCoverRatesData = async () => {
+      try {
+        const response = await axios.get(
+          "https://localhost:7110/api/TravelRates"
+        );
+
+        console.log("Response data:", response.data);
+
+        // Filter the data based on selected CPID and RID
+        const filteredData = response.data.filter(
+          (item) =>
+            item.cpid === selectedCoveragePeriod &&
+            item.rid === selectedCoverageArea
+        );
+
+        console.log("Filtered data:", filteredData);
+
+        setCoverRatesData(filteredData);
+      } catch (error) {
+        console.error("Error fetching cover rates data:", error);
+      }
+    };
+
+    fetchCoverRatesData();
+  }, [selectedCoverageArea, selectedCoveragePeriod]);
+
+  console.log("selectedCoverageArea:", selectedCoverageArea);
+  console.log("selectedCoveragePeriod:", selectedCoveragePeriod);
+
   return (
     <div className="container">
       <h1>Travel Insurance Form</h1>
@@ -83,7 +131,6 @@ export default function TravelForm() {
             required
           />
         </div>
-
         <div className="form-group">
           <label htmlFor="startingDate">Starting Date:</label>
           <input
@@ -96,7 +143,6 @@ export default function TravelForm() {
             required
           />
         </div>
-
         <div className="form-group">
           <label htmlFor="endingDate">Ending Date:</label>
           <input
@@ -112,29 +158,45 @@ export default function TravelForm() {
 
         <div className="form-group">
           <label htmlFor="coverageArea">Coverage Area:</label>
-          <select className="form-control" id="coverageArea" required>
-            {/* <option value="option1">Africa</option> */}
-            {coverageArea.map((areas) => (
-              <option key={areas.rid} value={areas.region}>
-                {areas.region}
+          <select
+            className="form-control"
+            id="coverageArea"
+            value={selectedCoverageArea}
+            onChange={(event) => setSelectedCoverageArea(event.target.value)}
+            required
+          >
+            {coverageArea.map((regio) => (
+              <option key={regio.rid} value={regio.rid}>
+                {regio.region}
               </option>
             ))}
           </select>
         </div>
-
         <div className="form-group">
-          <label htmlFor="Coverage_Period">Coverage Period:</label>
-          <select className="form-control" id="Coverage_Period" required>
+          <label htmlFor="CoveragePeriod">Coverage Period:</label>
+          <select
+            className="form-control"
+            id="CoveragePeriod"
+            value={selectedCoveragePeriod}
+            onChange={(event) => setSelectedCoveragePeriod(event.target.value)}
+            required
+          >
             <option value="optionA">Up to 7 days</option>
-            <option value="optionB">Option B</option>
-            <option value="optionC">Option C</option>
+            {coveragePeriod.map((period) => (
+              <option key={period.cpid} value={period.cpid}>
+                {period.description}
+              </option>
+            ))}
           </select>
         </div>
 
         <h1>dob:{dob}</h1>
         <h1>Number of days : {daysDifference}</h1>
         <h1>Age: {age}</h1>
-
+        <h1>
+          ids:
+          {selectedCoverageArea},{selectedCoveragePeriod} : rates->
+        </h1>
         {/* <div className="form-group">
           <label htmlFor="select3">Select Option 3:</label>
           <select className="form-control" id="select3" required>
@@ -143,7 +205,6 @@ export default function TravelForm() {
             <option value="valueZ">Value Z</option>
           </select>
         </div> */}
-
         <button type="submit" className="btn btn-primary">
           Submit
         </button>
