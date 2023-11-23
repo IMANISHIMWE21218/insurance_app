@@ -18,6 +18,8 @@ export default function TravelForm() {
 
   const [coverRatesData, setCoverRatesData] = useState([]);
 
+  const [reinPrimeum, setreinPrimeum] = useState(0);
+
   useEffect(() => {
     const fetchAPiData = async () => {
       try {
@@ -83,6 +85,10 @@ export default function TravelForm() {
 
   // Getting amount for * with exchange rate
 
+  let amount = 0;
+  let adminfees = 4500;
+  let NETPREMIUM = 0;
+
   useEffect(() => {
     console.log("start from here.");
     const fetchCoverRatesData = async () => {
@@ -100,9 +106,22 @@ export default function TravelForm() {
             item.rid === selectedCoverageArea
         );
 
-        console.log("Filtered data:", filteredData);
+        if (filteredData.length > 0) {
+          amount = filteredData[0].amount;
+          console.log("amamaaa" + amount);
+          setCoverRatesData(filteredData);
+          let exchangeRate = 1201;
+          let reinPrimeumSUM = amount * exchangeRate;
+          reinPrimeumSUM = reinPrimeumSUM.toFixed(2);
+          console.log("summm:" + reinPrimeumSUM);
+          setreinPrimeum(reinPrimeumSUM);
 
-        setCoverRatesData(filteredData);
+          NETPREMIUM = parseFloat(reinPrimeumSUM) + adminfees;
+          console.log("netttt" + NETPREMIUM);
+        } else {
+          console.log("No data found for the selected criteria.");
+          setCoverRatesData([]); // Set an empty array or handle as needed
+        }
       } catch (error) {
         console.error("Error fetching cover rates data:", error);
       }
@@ -195,8 +214,10 @@ export default function TravelForm() {
         <h1>Age: {age}</h1>
         <h1>
           ids:
-          {selectedCoverageArea},{selectedCoveragePeriod} : rates->
+          {selectedCoverageArea},{selectedCoveragePeriod}
         </h1>
+        <h1>REINS. PREM: {reinPrimeum}</h1>
+
         {/* <div className="form-group">
           <label htmlFor="select3">Select Option 3:</label>
           <select className="form-control" id="select3" required>
