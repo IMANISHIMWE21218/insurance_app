@@ -20,6 +20,9 @@ export default function TravelForm() {
 
   const [reinPrimeum, setreinPrimeum] = useState(0);
 
+  const [netPremium, setNetPremium] = useState(0);
+  const [grossPremium, setGrossPremium] = useState(0);
+
   useEffect(() => {
     const fetchAPiData = async () => {
       try {
@@ -118,6 +121,33 @@ export default function TravelForm() {
 
           NETPREMIUM = parseFloat(reinPrimeumSUM) + adminfees;
           console.log("netttt" + NETPREMIUM);
+          setNetPremium(NETPREMIUM);
+
+          // Calculate GROSSPREMIUM
+          let GrossPremium = NETPREMIUM * 1.18;
+          console.log("GROSSPREMIUM: " + GrossPremium);
+          console.log("Age:", age);
+
+          // Reduce GROSSPREMIUM by 50% if age is between 3 months and 18 years
+          if (age > 0.25 && age <= 18) {
+            GrossPremium *= 0.5;
+          }
+          // Increase GROSSPREMIUM by 50% if age is between 66 and 75 years
+          else if (age >= 66 && age <= 75) {
+            GrossPremium *= 1.5;
+          }
+          // Increase GROSSPREMIUM by 100% if age is between 76 and 80 years
+          else if (age >= 76 && age <= 80) {
+            GrossPremium *= 2;
+          }
+          // Increase GROSSPREMIUM by 300% if age is 81 years or older
+          else if (age >= 81) {
+            GrossPremium *= 4;
+          }
+
+          console.log("GROSSPREMIUM over 0%: " + GrossPremium);
+
+          setGrossPremium(GrossPremium);
         } else {
           console.log("No data found for the selected criteria.");
           setCoverRatesData([]); // Set an empty array or handle as needed
@@ -128,7 +158,7 @@ export default function TravelForm() {
     };
 
     fetchCoverRatesData();
-  }, [selectedCoverageArea, selectedCoveragePeriod]);
+  }, [selectedCoverageArea, selectedCoveragePeriod, age]);
 
   console.log("selectedCoverageArea:", selectedCoverageArea);
   console.log("selectedCoveragePeriod:", selectedCoveragePeriod);
@@ -174,7 +204,6 @@ export default function TravelForm() {
             required
           />
         </div>
-
         <div className="form-group">
           <label htmlFor="coverageArea">Coverage Area:</label>
           <select
@@ -208,16 +237,12 @@ export default function TravelForm() {
             ))}
           </select>
         </div>
-
         <h1>dob:{dob}</h1>
         <h1>Number of days : {daysDifference}</h1>
         <h1>Age: {age}</h1>
-        <h1>
-          ids:
-          {selectedCoverageArea},{selectedCoveragePeriod}
-        </h1>
         <h1>REINS. PREM: {reinPrimeum}</h1>
-
+        <h1>NETPREMIUM: {netPremium}</h1>
+        <h1>Gross premium: {grossPremium}</h1>
         {/* <div className="form-group">
           <label htmlFor="select3">Select Option 3:</label>
           <select className="form-control" id="select3" required>
